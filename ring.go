@@ -49,15 +49,13 @@ func (r *Ring) GetNode(key string) string {
 	// binary search r.positions for the first position >= hash
 	idx := sort.SearchInts(r.positions, hash)
 
-	if idx > len(r.positions) {
-		idx = idx - len(r.positions)
+	// if you go past the end of slice, wrap around to index 0
+	if idx == len(r.positions) {
+		idx = 0
 	}
 
-	return r.nodes[r.positions[idx]]
-
-	// if you go past the end of slice, wrap around to index 0
-
 	// look up that position in r.nodes and return the node name
+	return r.nodes[r.positions[idx]]
 }
 
 func main() {
