@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"hash/fnv"
+	"slices"
 	"sort"
 )
 
@@ -10,6 +11,11 @@ type Ring struct {
 	positions []int
 	nodes     map[int]string
 	vnodes    int
+}
+
+type Node struct {
+	name    string
+	address string
 }
 
 func NewRing(vnodes int) *Ring {
@@ -26,17 +32,16 @@ func hash(key string) int {
 	return int(h.Sum32())
 }
 
-func (r *Ring) AddNode(name string) {
+func (r *Ring) AddNode(n Node) {
 	// // create 3 vnodes with has function
 	// use fnv hash function
 	// append them intot he slice
 	// sort the slice
 	for i := 0; i < r.vnodes; i++ {
-
-		vnodename := fmt.Sprintf("%s-v%d", name, i)
+		vnodename := fmt.Sprintf("%s-v%d", n.name, i)
 		vnodehash := hash(vnodename)
 		r.positions = append(r.positions, vnodehash)
-		r.nodes[vnodehash] = name
+		r.nodes[vnodehash] = n.address
 	}
 
 	sort.Ints(r.positions)
@@ -58,13 +63,36 @@ func (r *Ring) GetNode(key string) string {
 	return r.nodes[r.positions[idx]]
 }
 
+func (r *Ring) RemoveNode(n Node) {
+	// loop through r.vnodes
+	for i := 0; i < r.vnodes; i++ {
+		vnodename := fmt.Sprintf("%s-v%d", n.name, i)
+		vnodehash := hash(vnodename)
+		delete(r.nodes, vnodehash)
+
+		r.positions = slices.DeleteFunc(r.positions, func(n int) bool {
+			return n == vnodehash
+		})
+	}
+}
+
 func main() {
 	r := NewRing(3)
-	r.AddNode("node1")
-	r.AddNode("node2")
-	r.AddNode("node3")
 
-	r.GetNode("lakers_score")
-	r.GetNode("rockets_score")
-	r.GetNode("celtics_score")
+	node1 := Node{name: "node1", address: "192.168.1.1:8080"}
+	node2 := Node{name: "node2", address: "192.168.1.2:8080"}
+	node3 := Node{name: "node3", address: "192.168.1.3:8080"}
+
+	r.AddNode(node1)
+	r.AddNode(node2)
+	r.AddNode(node3)
+
+	fmt.Println(r.GetNode("lakers_score"))
+	fmt.Println(r.GetNode("rockets_score"))
+	fmt.Println(r.GetNode("celtics_score"))
+	fmt.Println("before remove:", r.GetNode("lakers_score"))
+	r.RemoveNode(node2)
+	r.RemoveNode(node1)
+	fmt.Println("after remove:", r.GetNode("lakers_score"))
+
 }
