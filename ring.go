@@ -63,7 +63,7 @@ func (r *Ring) GetNode(key string) string {
 		idx = 0
 	}
 
-	// look up that position in r.nodes and return the node name
+	// look up that position in r.nodes and return the node ip address
 	return r.nodes[r.positions[idx]]
 }
 
