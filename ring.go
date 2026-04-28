@@ -48,6 +48,10 @@ func (r *Ring) AddNode(n Node) {
 }
 
 func (r *Ring) GetNode(key string) string {
+
+	if len(r.positions) == 0 {
+		return ""
+	}
 	// hash the key to get a position
 	hash := hash(key) //123456789
 

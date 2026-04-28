@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 func main() {
 	ring := NewRing(3)
@@ -15,6 +18,7 @@ func main() {
 	registry.Register(node3)
 
 	ring.AddNode(node1)
+	ring.AddNode(node2)
 	ring.AddNode(node3)
 
 	fmt.Println(ring.GetNode("lakers_score"))
@@ -22,9 +26,10 @@ func main() {
 	fmt.Println(ring.GetNode("celtics_score"))
 	fmt.Println("before check health:", ring.GetNode("lakers_score"))
 
-	registry.CheckHealth(ring)
+	go registry.StartHealthChecker(ring)
 	// r.RemoveNode(node2)
 
-	fmt.Println("after check health:", ring.GetNode("lakers_score"))
+	time.Sleep(20 * time.Second)
 
+	fmt.Println("after check health:", ring.GetNode("lakers_score"))
 }

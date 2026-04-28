@@ -38,3 +38,11 @@ func (reg *Registry) CheckHealth(ring *Ring) {
 		}
 	}
 }
+
+func (reg *Registry) StartHealthChecker(ring *Ring) {
+	for {
+		time.Sleep(5 * time.Second)
+		reg.CheckHealth(ring)
+
+	}
+}
