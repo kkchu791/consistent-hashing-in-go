@@ -13,11 +13,6 @@ type Ring struct {
 	vnodes    int
 }
 
-type Node struct {
-	name    string
-	address string
-}
-
 func NewRing(vnodes int) *Ring {
 	return &Ring{
 		positions: []int{},

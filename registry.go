@@ -1,6 +1,11 @@
 package main
 
-import "time"
+import (
+	"net"
+	"strings"
+	"sync"
+	"time"
+)
 
 type Member struct {
 	node     Node
@@ -9,11 +14,14 @@ type Member struct {
 
 type Registry struct {
 	members map[string]Member
+	address string
+	mu      sync.Mutex
 }
 
-func NewRegistry() *Registry {
+func NewRegistry(address string) *Registry {
 	return &Registry{
 		members: map[string]Member{},
+		address: address,
 	}
 }
 
@@ -22,9 +30,11 @@ func (r *Registry) Register(n Node) {
 }
 
 func (r *Registry) Heartbeat(name string) {
+	r.mu.Lock()
 	member := r.members[name]
 	member.lastseen = time.Now()
 	r.members[name] = member
+	defer r.mu.Unlock()
 }
 
 //r.CheckHealth(r)
@@ -45,4 +55,27 @@ func (reg *Registry) StartHealthChecker(ring *Ring) {
 		reg.CheckHealth(ring)
 
 	}
+}
+
+func (reg *Registry) ListenHeartBeat() {
+	ln, err := net.Listen("tcp", reg.address)
+	handleError(err)
+
+	for {
+		conn, err := ln.Accept()
+
+		handleError(err)
+		go handleConnection(reg, conn)
+	}
+}
+
+func handleConnection(r *Registry, c net.Conn) {
+
+	buf := make([]byte, 1024)
+	n, err := c.Read(buf)
+	handleError(err)
+
+	nodename := strings.TrimSpace(string(buf[:n]))
+	r.Heartbeat(nodename)
+
 }
