@@ -26,20 +26,27 @@ func NewRegistry(address string) *Registry {
 }
 
 func (r *Registry) Register(n Node) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	r.members[n.name] = Member{n, time.Now()}
 }
 
 func (r *Registry) Heartbeat(name string) {
 	r.mu.Lock()
+	defer r.mu.Unlock()
+
 	member := r.members[name]
 	member.lastseen = time.Now()
 	r.members[name] = member
-	defer r.mu.Unlock()
 }
 
 //r.CheckHealth(r)
 
 func (reg *Registry) CheckHealth(ring *Ring) {
+	reg.mu.Lock()
+	defer reg.mu.Unlock()
+
 	for nodename, member := range reg.members {
 		if time.Since(member.lastseen) > 10*time.Second {
 			// remove from the member map

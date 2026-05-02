@@ -9,6 +9,7 @@ type Node struct {
 	name         string
 	address      string
 	registryAddr string
+	messages     []*Message
 }
 
 func (n *Node) SendHeartBeat() {
