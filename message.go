@@ -3,10 +3,15 @@ package main
 import "time"
 
 type Message struct {
-	task        string
-	notes       string
-	improvement string
-	goal        string
-	timestamp   time.Time
-	offset      int
+	Task      string
+	Notes     string
+	Timestamp time.Time
+}
+
+func NewMessage(m, n string) *Message {
+	return &Message{
+		Task:      m,
+		Notes:     n,
+		Timestamp: time.Now(),
+	}
 }

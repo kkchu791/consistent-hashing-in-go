@@ -28,17 +28,13 @@ func NewLog(name string) *Log {
 	}
 }
 
-func (l *Log) Append(m Message) error {
+func (l *Log) Append(m *Message) error {
 	// serialize the message to JSON
-	jsonData, err := json.Marshal(m)
-	if err != nil {
-		return err
-	}
+	jsonData, err := json.Marshal(m) //stuct to -> {"task": "sup"}
+	handleError(err)
 	// Writes it as a new line at the end of the file
 	_, err = l.file.Write(append(jsonData, '\n'))
-	if err != nil {
-		return err
-	}
+	handleError(err)
 	// incremement the offset counter
 	l.offset++
 
@@ -46,16 +42,16 @@ func (l *Log) Append(m Message) error {
 }
 
 func (l *Log) Read(offset int) (Message, error) {
+	l.file.Seek(0, 0)
 	scanner := bufio.NewScanner(l.file)
-
+	var m Message
 	for i := 0; scanner.Scan(); i++ {
 		if i == offset {
-			var m Message
 			json.Unmarshal([]byte(scanner.Text()), &m)
 			return m, nil
 		}
 	}
 
-	return Message{}, fmt.Errorf("offset %d not found", offset)
+	return m, fmt.Errorf("offset %d not found", offset)
 
 }
