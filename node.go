@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net"
 	"time"
 )
@@ -18,7 +19,15 @@ func (n *Node) SendHeartBeat() {
 		conn, err := net.Dial("tcp", n.registryAddr)
 		handleError(err)
 
-		_, err = conn.Write([]byte(n.name + "\n"))
+		// write a json Packet
+		packet := Packet{
+			Type:    TypeHeartbeat,
+			Payload: n.name,
+		}
+
+		jsonData, _ := json.Marshal(packet)
+
+		_, err = conn.Write(append(jsonData, '\n'))
 		handleError(err)
 
 		conn.Close()

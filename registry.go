@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"net"
-	"strings"
 	"sync"
 	"time"
 )
@@ -77,12 +79,21 @@ func (reg *Registry) ListenHeartBeat() {
 }
 
 func handleConnection(r *Registry, c net.Conn) {
+	// Read a JSON packet
 
 	buf := make([]byte, 1024)
 	n, err := c.Read(buf)
 	handleError(err)
 
-	nodename := strings.TrimSpace(string(buf[:n]))
-	r.Heartbeat(nodename)
+	var packet Packet
+	data := bytes.TrimSpace(buf[:n])
+	err = json.Unmarshal(data, &packet)
+	handleError(err)
+	if packet.Type == TypeHeartbeat {
+		r.Heartbeat(packet.Payload)
+		fmt.Println("heartbeat received from:", packet.Payload)
+	} else {
+
+	}
 
 }
