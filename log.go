@@ -30,10 +30,10 @@ func NewLog(name string) *Log {
 
 func (l *Log) Append(m *Message) error {
 	// serialize the message to JSON
-	jsonData, err := json.Marshal(m) //stuct to -> {"task": "sup"}
+	jsonBytes, err := json.Marshal(m) //stuct to -> {"task": "sup"}
 	handleError(err)
 	// Writes it as a new line at the end of the file
-	_, err = l.file.Write(append(jsonData, '\n'))
+	_, err = l.file.Write(append(jsonBytes, '\n'))
 	handleError(err)
 	// incremement the offset counter
 	l.offset++

@@ -1,8 +1,11 @@
 package main
 
+import "encoding/json"
+
 type Packet struct {
 	Type    string
-	Payload string
+	Key     string
+	Payload json.RawMessage
 }
 
 const (

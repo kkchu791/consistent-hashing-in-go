@@ -90,10 +90,13 @@ func handleConnection(r *Registry, c net.Conn) {
 	err = json.Unmarshal(data, &packet)
 	handleError(err)
 	if packet.Type == TypeHeartbeat {
-		r.Heartbeat(packet.Payload)
+		var payloadString string
+		err := json.Unmarshal(packet.Payload, &payloadString)
+		handleError(err)
+		r.Heartbeat(payloadString)
 		fmt.Println("heartbeat received from:", packet.Payload)
 	} else {
-
+		fmt.Println("got different packet type than heartbeat")
 	}
 
 }
