@@ -23,8 +23,8 @@ func (p *Producer) Send(key string, message *Message) error {
 	conn, err := net.Dial("tcp", nodeipaddress)
 	handleError(err)
 
-	// message looks like {"task": "Jog", "notes": "2 miles"}
-	messageBytes, _ := json.Marshal(message)
+	// message looks like {"task": "Drink Water", "notes": "N/A"}
+	messageBytes, _ := json.Marshal(message) // converts json into a slice of bytes
 
 	packet := Packet{
 		Type:    TypeMessage,
@@ -33,7 +33,7 @@ func (p *Producer) Send(key string, message *Message) error {
 	}
 
 	packetBytes, _ := json.Marshal(packet)
-	_, err = conn.Write(packetBytes)
+	_, err = conn.Write(append(packetBytes, '\n'))
 	handleError(err)
 
 	return err

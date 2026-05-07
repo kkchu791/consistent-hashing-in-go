@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 func main() {
@@ -13,9 +14,11 @@ func main() {
 	node2 := Node{name: "node2", address: "127.0.0.1:8081", registryAddr: "127.0.0.1:3000"}
 	node3 := Node{name: "node3", address: "127.0.0.1:8082", registryAddr: "127.0.0.1:3000"}
 
-	node1.Listen()
-	node2.Listen()
-	node3.Listen()
+	go node1.Listen()
+	go node2.Listen()
+	go node3.Listen()
+
+	time.Sleep(100 * time.Millisecond) // ← let listeners bind before dialing
 
 	registry.Register(node1)
 	registry.Register(node2)
@@ -26,13 +29,15 @@ func main() {
 	ring.AddNode(node3)
 
 	newMessage := NewMessage(
-		"Learning",
-		"Learning Distribute Systems",
+		"Talk to stranger at networking event",
+		"N/A",
 	)
 
 	np := NewProducer(ring)
 
-	np.Send("distributed-systems", newMessage)
+	np.Send("software engineer", newMessage)
+
+	time.Sleep(500 * time.Millisecond) // ← let the node finish writing before exit
 
 }
 

@@ -11,4 +11,9 @@ type Packet struct {
 const (
 	TypeHeartbeat = "HEARTBEAT"
 	TypeMessage   = "MESSAGE"
+	TypeFetch     = "FETCH"
 )
+
+type FetchRequest struct {
+	Offset int
+}

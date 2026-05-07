@@ -16,15 +16,15 @@ type Ring struct {
 func NewRing(vnodes int) *Ring {
 	return &Ring{
 		positions: []int{},
-		nodes:     map[int]string{},
+		nodes:     map[int]string{}, // {hash : nodeipaddress}
 		vnodes:    vnodes,
 	}
 }
 
 func hash(key string) int {
-	h := fnv.New32a()
-	h.Write([]byte(key))
-	return int(h.Sum32())
+	h := fnv.New32a()     // returns a 32 it FNV (Fowler Noll Vo) non cryptographic hash interface
+	h.Write([]byte(key))  // we write to h so it collects the data
+	return int(h.Sum32()) // we execute h and get the hash number
 }
 
 func (r *Ring) AddNode(n Node) {
@@ -51,6 +51,10 @@ func (r *Ring) GetNode(key string) string {
 	hash := hash(key) //123456789
 
 	// binary search r.positions for the first position >= hash
+
+	// hash = 3
+	// [1, 4, 6]
+
 	idx := sort.SearchInts(r.positions, hash)
 
 	// if you go past the end of slice, wrap around to index 0

@@ -50,12 +50,12 @@ func (n *Node) Listen() {
 		conn, err := listener.Accept()
 		handleError(err)
 
-		go handleNodeConnection(conn)
+		go n.handleNodeConnection(conn)
 	}
 }
 
 // reads from the incoming and writes to the log file
-func handleNodeConnection(conn net.Conn) {
+func (n *Node) handleNodeConnection(conn net.Conn) {
 	defer conn.Close()
 	for {
 		reader := bufio.NewReader(conn)
@@ -80,7 +80,9 @@ func handleNodeConnection(conn net.Conn) {
 		msgKey := packet.Key
 		msgPayloadBytes := packet.Payload
 
-		if msgType == TypeMessage {
+		switch msgType {
+
+		case TypeMessage:
 			message := NewMessage("", "")
 			err = json.Unmarshal(msgPayloadBytes, message)
 			if err != nil {
@@ -90,8 +92,25 @@ func handleNodeConnection(conn net.Conn) {
 
 			l := NewLog(msgKey)
 			l.Append(message)
-		} else {
+		case TypeFetch:
+			// 1. unmarshal the payload into a FetchRequest to get the offset
+			var fetchRequest FetchRequest
+			json.Unmarshal(msgPayloadBytes, &fetchRequest)
+
+			// 2. use the offset to read from the log
+
+			offset := fetchRequest.Offset
+			readmessage, err := l.Read(offset) // what if I wanted to Read certain message with "task: Log Implementation"
+			handleError(err)
+			// 3. wrap the message in a Packet and write it back to conn
+
+		default:
 			fmt.Println("got some other type other than messagetype")
 		}
 	}
 }
+
+// func main() {
+// 	node := Node{name: "node1", address: "127.0.0.1:8080", registryAddr: "127.0.0.1:3000"}
+// 	node.Listen()
+// }
